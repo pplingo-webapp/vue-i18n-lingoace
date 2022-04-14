@@ -79,8 +79,13 @@ export function isFunction (val: mixed): boolean %checks {
 export function parseArgs (...args: Array<mixed>): Object {
   let locale: ?string = null
   let params: mixed = null
+  let defaultMessage: DefaultMessage = {}
   if (args.length === 1) {
-    if (isObject(args[0]) || isArray(args[0])) {
+    if (isObject(args[0])) {
+      if(args[0] !== null && args[0]._defaultMessage){
+        defaultMessage = args[0];
+      }
+    } else if (isObject(args[0]) || isArray(args[0])) {
       params = args[0]
     } else if (typeof args[0] === 'string') {
       locale = args[0]
@@ -89,13 +94,28 @@ export function parseArgs (...args: Array<mixed>): Object {
     if (typeof args[0] === 'string') {
       locale = args[0]
     }
-    /* istanbul ignore if */
-    if (isObject(args[1]) || isArray(args[1])) {
-      params = args[1]
+    if (isObject(args[1])) {
+      if(args[1] !== null && args[1]._defaultMessage){
+        defaultMessage = args[1];
+      }
+    } else if (isObject(args[1]) || isArray(args[1])) {
+        params = args[1]
+    }  
+  } else if (args.length === 3) {
+    if (typeof args[0] === 'string') {
+      locale = args[0]
     }
+    if (isObject(args[1]) || isArray(args[1])) {
+        params = args[1]
+    }  
+    if (isObject(args[2])) {
+      if(args[2] !== null && args[2]._defaultMessage){
+        defaultMessage = args[2];
+      }
+    } 
   }
 
-  return { locale, params }
+  return { locale, params, defaultMessage }
 }
 
 export function looseClone (obj: Object): Object {

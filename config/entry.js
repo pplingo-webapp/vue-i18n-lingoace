@@ -6,7 +6,7 @@ const node = require('rollup-plugin-node-resolve')
 const cjs = require('rollup-plugin-commonjs')
 const banner = require('./banner')
 const pack = require('../package.json')
-
+pack.name = "vue-i18n";
 function toUpper (_, c) {
   return c ? c.toUpperCase() : ''
 }

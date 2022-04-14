@@ -1,5 +1,5 @@
 {
-  "name": "vue-i18n",
+  "name": "@lingoace/vue-i18n",
   "description": "Internationalization plugin for Vue.js",
   "version": "8.27.1",
   "author": {
@@ -7,7 +7,7 @@
     "email": "kawakazu80@gmail.com"
   },
   "bugs": {
-    "url": "https://github.com/kazupon/vue-i18n/issues"
+    "url": "https://github.com/pplingo-webapp/vue-i18n-lingoace/issues"
   },
   "changelog": {
     "labels": {
@@ -104,7 +104,7 @@
     "tags": "vetur/tags.json",
     "attributes": "vetur/attributes.json"
   },
-  "homepage": "https://github.com/kazupon/vue-i18n#readme",
+  "homepage": "https://github.com/pplingo-webapp/vue-i18n-lingoace#readme",
   "keywords": [
     "i18n",
     "internationalization",
@@ -117,13 +117,13 @@
   "module": "dist/vue-i18n.esm.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kazupon/vue-i18n.git"
+    "url": "git+https://github.com/pplingo-webapp/vue-i18n-lingoace.git"
   },
   "scripts": {
     "build": "node config/build.js",
     "clean": "rm -rf coverage && rm -rf dist/*.js* && rm ./*.log",
     "coverage": "cat ./coverage/lcov.info",
-    "dev": "cross-env BABEL_ENV=test webpack-dev-server --inline --hot --open --content-base ./test/unit/ --config config/webpack.dev.conf.js",
+    "dev": "cross-env BABEL_ENV=test webpack serve --inline --hot --open --content-base ./test/unit/ --config config/webpack.dev.conf.js",
     "docs:build": "cross-env NODE_ENV=production node config/version.js && cross-env NODE_ENV=production vuepress build vuepress -d docs",
     "docs:clean": "rm -rf docs/**",
     "docs:dev": "vuepress dev vuepress",

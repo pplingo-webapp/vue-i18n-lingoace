@@ -108,6 +108,12 @@ function remove (arr, item) {
   }
 }
 
+function arrayFrom (arr) {
+  const ret = [];
+  arr.forEach(a => ret.push(a));
+  return ret
+}
+
 function includes (arr, item) {
   return !!~arr.indexOf(item)
 }
@@ -212,9 +218,9 @@ function extend (Vue) {
     });
   }
 
-  Vue.prototype.$t = function (key, ...values) {
+  Vue.prototype.$t = function (key, defaultMessage, ...values) {
     const i18n = this.$i18n;
-    return i18n._t(key, i18n.locale, i18n._getMessages(), this, ...values)
+    return i18n._t(key, i18n.locale, i18n._getMessages(), this, defaultMessage, ...values)
   };
 
   Vue.prototype.$tc = function (key, choice, ...values) {
@@ -238,146 +244,160 @@ function extend (Vue) {
 
 /*  */
 
-var mixin = {
-  beforeCreate () {
-    const options = this.$options;
-    options.i18n = options.i18n || (options.__i18n ? {} : null);
-
-    if (options.i18n) {
-      if (options.i18n instanceof VueI18n) {
-        // init locale messages via custom blocks
-        if (options.__i18n) {
-          try {
-            let localeMessages = options.i18n && options.i18n.messages ? options.i18n.messages : {};
-            options.__i18n.forEach(resource => {
-              localeMessages = merge(localeMessages, JSON.parse(resource));
-            });
-            Object.keys(localeMessages).forEach((locale) => {
-              options.i18n.mergeLocaleMessage(locale, localeMessages[locale]);
-            });
-          } catch (e) {
-            {
-              error(`Cannot parse locale messages via custom blocks.`, e);
-            }
-          }
-        }
-        this._i18n = options.i18n;
-        this._i18nWatcher = this._i18n.watchI18nData();
-      } else if (isPlainObject(options.i18n)) {
-        const rootI18n = this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n
-          ? this.$root.$i18n
-          : null;
-        // component local i18n
-        if (rootI18n) {
-          options.i18n.root = this.$root;
-          options.i18n.formatter = rootI18n.formatter;
-          options.i18n.fallbackLocale = rootI18n.fallbackLocale;
-          options.i18n.formatFallbackMessages = rootI18n.formatFallbackMessages;
-          options.i18n.silentTranslationWarn = rootI18n.silentTranslationWarn;
-          options.i18n.silentFallbackWarn = rootI18n.silentFallbackWarn;
-          options.i18n.pluralizationRules = rootI18n.pluralizationRules;
-          options.i18n.preserveDirectiveContent = rootI18n.preserveDirectiveContent;
-        }
-
-        // init locale messages via custom blocks
-        if (options.__i18n) {
-          try {
-            let localeMessages = options.i18n && options.i18n.messages ? options.i18n.messages : {};
-            options.__i18n.forEach(resource => {
-              localeMessages = merge(localeMessages, JSON.parse(resource));
-            });
-            options.i18n.messages = localeMessages;
-          } catch (e) {
-            {
-              warn(`Cannot parse locale messages via custom blocks.`, e);
-            }
-          }
-        }
-
-        const { sharedMessages } = options.i18n;
-        if (sharedMessages && isPlainObject(sharedMessages)) {
-          options.i18n.messages = merge(options.i18n.messages, sharedMessages);
-        }
-
-        this._i18n = new VueI18n(options.i18n);
-        this._i18nWatcher = this._i18n.watchI18nData();
-
-        if (options.i18n.sync === undefined || !!options.i18n.sync) {
-          this._localeWatcher = this.$i18n.watchLocale();
-        }
-
-        if (rootI18n) {
-          rootI18n.onComponentInstanceCreated(this._i18n);
-        }
-      } else {
-        {
-          warn(`Cannot be interpreted 'i18n' option.`);
-        }
-      }
-    } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-      // root i18n
-      this._i18n = this.$root.$i18n;
-    } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
-      // parent i18n
-      this._i18n = options.parent.$i18n;
-    }
-  },
-
-  beforeMount () {
-    const options = this.$options;
-    options.i18n = options.i18n || (options.__i18n ? {} : null);
-
-    if (options.i18n) {
-      if (options.i18n instanceof VueI18n) {
-        // init locale messages via custom blocks
-        this._i18n.subscribeDataChanging(this);
-        this._subscribing = true;
-      } else if (isPlainObject(options.i18n)) {
-        this._i18n.subscribeDataChanging(this);
-        this._subscribing = true;
-      } else {
-        {
-          warn(`Cannot be interpreted 'i18n' option.`);
-        }
-      }
-    } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
-      this._i18n.subscribeDataChanging(this);
-      this._subscribing = true;
-    } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
-      this._i18n.subscribeDataChanging(this);
-      this._subscribing = true;
-    }
-  },
-
-  mounted () {
+/**
+ * Mixin
+ * 
+ * If `bridge` mode, empty mixin is returned,
+ * else regulary mixin implementation is returned.
+ */
+function defineMixin (bridge = false) {
+  function mounted () {
     if (this !== this.$root && this.$options.__INTLIFY_META__ && this.$el) {
       this.$el.setAttribute('data-intlify', this.$options.__INTLIFY_META__);
     }
-  },
-
-  beforeDestroy () {
-    if (!this._i18n) { return }
-
-    const self = this;
-    this.$nextTick(() => {
-      if (self._subscribing) {
-        self._i18n.unsubscribeDataChanging(self);
-        delete self._subscribing;
-      }
-
-      if (self._i18nWatcher) {
-        self._i18nWatcher();
-        self._i18n.destroyVM();
-        delete self._i18nWatcher;
-      }
-
-      if (self._localeWatcher) {
-        self._localeWatcher();
-        delete self._localeWatcher;
-      }
-    });
   }
-};
+
+  return bridge
+    ? { mounted } // delegate `vue-i18n-bridge` mixin implementation
+    : { // regulary 
+    beforeCreate () {
+      const options = this.$options;
+      options.i18n = options.i18n || ((options.__i18nBridge || options.__i18n) ? {} : null);
+
+      if (options.i18n) {
+        if (options.i18n instanceof VueI18n) {
+          // init locale messages via custom blocks
+          if ((options.__i18nBridge || options.__i18n)) {
+            try {
+              let localeMessages = options.i18n && options.i18n.messages ? options.i18n.messages : {};
+              const __i18n = options.__i18nBridge || options.__i18n;
+              __i18n.forEach(resource => {
+                localeMessages = merge(localeMessages, JSON.parse(resource));
+              });
+              Object.keys(localeMessages).forEach((locale) => {
+                options.i18n.mergeLocaleMessage(locale, localeMessages[locale]);
+              });
+            } catch (e) {
+              {
+                error(`Cannot parse locale messages via custom blocks.`, e);
+              }
+            }
+          }
+          this._i18n = options.i18n;
+          this._i18nWatcher = this._i18n.watchI18nData();
+        } else if (isPlainObject(options.i18n)) {
+          const rootI18n = this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n
+            ? this.$root.$i18n
+            : null;
+          // component local i18n
+          if (rootI18n) {
+            options.i18n.root = this.$root;
+            options.i18n.formatter = rootI18n.formatter;
+            options.i18n.fallbackLocale = rootI18n.fallbackLocale;
+            options.i18n.formatFallbackMessages = rootI18n.formatFallbackMessages;
+            options.i18n.silentTranslationWarn = rootI18n.silentTranslationWarn;
+            options.i18n.silentFallbackWarn = rootI18n.silentFallbackWarn;
+            options.i18n.pluralizationRules = rootI18n.pluralizationRules;
+            options.i18n.preserveDirectiveContent = rootI18n.preserveDirectiveContent;
+          }
+
+          // init locale messages via custom blocks
+          if ((options.__i18nBridge || options.__i18n)) {
+            try {
+              let localeMessages = options.i18n && options.i18n.messages ? options.i18n.messages : {};
+              const __i18n = options.__i18nBridge || options.__i18n;
+              __i18n.forEach(resource => {
+                localeMessages = merge(localeMessages, JSON.parse(resource));
+              });
+              options.i18n.messages = localeMessages;
+            } catch (e) {
+              {
+                warn(`Cannot parse locale messages via custom blocks.`, e);
+              }
+            }
+          }
+
+          const { sharedMessages } = options.i18n;
+          if (sharedMessages && isPlainObject(sharedMessages)) {
+            options.i18n.messages = merge(options.i18n.messages, sharedMessages);
+          }
+
+          this._i18n = new VueI18n(options.i18n);
+          this._i18nWatcher = this._i18n.watchI18nData();
+
+          if (options.i18n.sync === undefined || !!options.i18n.sync) {
+            this._localeWatcher = this.$i18n.watchLocale();
+          }
+
+          if (rootI18n) {
+            rootI18n.onComponentInstanceCreated(this._i18n);
+          }
+        } else {
+          {
+            warn(`Cannot be interpreted 'i18n' option.`);
+          }
+        }
+      } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
+        // root i18n
+        this._i18n = this.$root.$i18n;
+      } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
+        // parent i18n
+        this._i18n = options.parent.$i18n;
+      }
+    },
+
+    beforeMount () {
+      const options = this.$options;
+      options.i18n = options.i18n || ((options.__i18nBridge || options.__i18n) ? {} : null);
+
+      if (options.i18n) {
+        if (options.i18n instanceof VueI18n) {
+          // init locale messages via custom blocks
+          this._i18n.subscribeDataChanging(this);
+          this._subscribing = true;
+        } else if (isPlainObject(options.i18n)) {
+          this._i18n.subscribeDataChanging(this);
+          this._subscribing = true;
+        } else {
+          {
+            warn(`Cannot be interpreted 'i18n' option.`);
+          }
+        }
+      } else if (this.$root && this.$root.$i18n && this.$root.$i18n instanceof VueI18n) {
+        this._i18n.subscribeDataChanging(this);
+        this._subscribing = true;
+      } else if (options.parent && options.parent.$i18n && options.parent.$i18n instanceof VueI18n) {
+        this._i18n.subscribeDataChanging(this);
+        this._subscribing = true;
+      }
+    },
+
+    mounted,
+
+    beforeDestroy () {
+      if (!this._i18n) { return }
+
+      const self = this;
+      this.$nextTick(() => {
+        if (self._subscribing) {
+          self._i18n.unsubscribeDataChanging(self);
+          delete self._subscribing;
+        }
+
+        if (self._i18nWatcher) {
+          self._i18nWatcher();
+          self._i18n.destroyVM();
+          delete self._i18nWatcher;
+        }
+
+        if (self._localeWatcher) {
+          self._localeWatcher();
+          delete self._localeWatcher;
+        }
+      });
+    }
+  }
+}
 
 /*  */
 
@@ -661,7 +681,7 @@ function makeParams (locale, args) {
 
 let Vue;
 
-function install (_Vue) {
+function install (_Vue, options = { bridge: false }) {
   /* istanbul ignore if */
   if (install.installed && _Vue === Vue) {
     warn('already installed.');
@@ -679,7 +699,7 @@ function install (_Vue) {
   }
 
   extend(Vue);
-  Vue.mixin(mixin);
+  Vue.mixin(defineMixin(options.bridge));
   Vue.directive('t', { bind, update, unbind });
   Vue.component(interpolationComponent.name, interpolationComponent);
   Vue.component(numberComponent.name, numberComponent);
@@ -1109,7 +1129,7 @@ class I18nPath {
 
 
 const htmlTagMatcher = /<\/?[\w\s="/.':;#-\/]+>/;
-const linkKeyMatcher = /(?:@(?:\.[a-z]+)?:(?:[\w\-_|.]+|\([\w\-_|.]+\)))/g;
+const linkKeyMatcher = /(?:@(?:\.[a-z]+)?:(?:[\w\-_|./]+|\([\w\-_:|./]+\)))/g;
 const linkKeyPrefixMatcher = /^@(?:\.([a-z]+))?:/;
 const bracketsMatcher = /[()]/g;
 const defaultModifiers = {
@@ -1148,6 +1168,8 @@ class VueI18n {
   
   
   
+  
+  
 
   constructor (options = {}) {
     // Auto install if it is not done yet and `window` has `Vue`.
@@ -1163,7 +1185,7 @@ class VueI18n {
       ? false
       : options.fallbackLocale || 'en-US';
     const messages = options.messages || {};
-    const dateTimeFormats = options.dateTimeFormats || {};
+    const dateTimeFormats = options.dateTimeFormats || options.datetimeFormats || {};
     const numberFormats = options.numberFormats || {};
 
     this._vm = null;
@@ -1175,6 +1197,9 @@ class VueI18n {
     this._fallbackRoot = options.fallbackRoot === undefined
       ? true
       : !!options.fallbackRoot;
+    this._fallbackRootWithEmptyString = options.fallbackRootWithEmptyString === undefined
+      ? true
+      : !!options.fallbackRootWithEmptyString;
     this._formatFallbackMessages = options.formatFallbackMessages === undefined
       ? false
       : !!options.formatFallbackMessages;
@@ -1196,6 +1221,10 @@ class VueI18n {
     this._warnHtmlInMessage = options.warnHtmlInMessage || 'off';
     this._postTranslation = options.postTranslation || null;
     this._escapeParameterHtml = options.escapeParameterHtml || false;
+
+    if ('__VUE_I18N_BRIDGE__' in options) {
+      this.__VUE_I18N_BRIDGE__ = options.__VUE_I18N_BRIDGE__;
+    }
 
     /**
      * @param choice {number} a choice index given by the input to $tc: `$tc('path.to.rule', choiceIndex)`
@@ -1307,7 +1336,7 @@ class VueI18n {
   _initVM (data) {
     const silent = Vue.config.silent;
     Vue.config.silent = true;
-    this._vm = new Vue({ data });
+    this._vm = new Vue({ data, __VUE18N__INSTANCE__: true });
     Vue.config.silent = silent;
   }
 
@@ -1324,24 +1353,39 @@ class VueI18n {
   }
 
   watchI18nData () {
-    const self = this;
     return this._vm.$watch('$data', () => {
-      self._dataListeners.forEach(e => {
+      const listeners = arrayFrom(this._dataListeners);
+      let i = listeners.length;
+      while(i--) {
         Vue.nextTick(() => {
-          e && e.$forceUpdate();
+          listeners[i] && listeners[i].$forceUpdate();
         });
-      });
+      }
     }, { deep: true })
   }
 
-  watchLocale () {
-    /* istanbul ignore if */
-    if (!this._sync || !this._root) { return null }
-    const target = this._vm;
-    return this._root.$i18n.vm.$watch('locale', (val) => {
-      target.$set(target, 'locale', val);
-      target.$forceUpdate();
-    }, { immediate: true })
+  watchLocale (composer) {
+    if (!composer) {
+      /* istanbul ignore if */
+      if (!this._sync || !this._root) { return null }
+      const target = this._vm;
+      return this._root.$i18n.vm.$watch('locale', (val) => {
+        target.$set(target, 'locale', val);
+        target.$forceUpdate();
+      }, { immediate: true })
+    } else {
+      // deal with vue-i18n-bridge
+      if (!this.__VUE_I18N_BRIDGE__) { return null }
+      const self = this;
+      const target = this._vm;
+      return this.vm.$watch('locale', (val) => {
+        target.$set(target, 'locale', val);
+        if (self.__VUE_I18N_BRIDGE__ && composer) {
+          composer.locale.value = val;
+        }
+        target.$forceUpdate();
+      }, { immediate: true })
+    }
   }
 
   onComponentInstanceCreated (newI18n) {
@@ -1401,11 +1445,14 @@ class VueI18n {
   get postTranslation () { return this._postTranslation }
   set postTranslation (handler) { this._postTranslation = handler; }
 
+  get sync () { return this._sync }
+  set sync (val) { this._sync = val; }
+
   _getMessages () { return this._vm.messages }
   _getDateTimeFormats () { return this._vm.dateTimeFormats }
   _getNumberFormats () { return this._vm.numberFormats }
 
-  _warnDefault (locale, key, result, vm, values, interpolateMode) {
+  _warnDefault (locale, key, result, vm, values, interpolateMode, defaultMessage) {
     if (!isNull(result)) { return result }
     if (this._missing) {
       const missingRet = this._missing.apply(null, [locale, key, vm, values]);
@@ -1420,7 +1467,10 @@ class VueI18n {
         );
       }
     }
-
+    if (defaultMessage) {
+      const parsedArgs = parseArgs(...values);
+      return this._render(key, interpolateMode, parsedArgs.params, key)
+    }
     if (this._formatFallbackMessages) {
       const parsedArgs = parseArgs(...values);
       return this._render(key, interpolateMode, parsedArgs.params, key)
@@ -1430,7 +1480,7 @@ class VueI18n {
   }
 
   _isFallbackRoot (val) {
-    return !val && !isNull(this._root) && this._fallbackRoot
+    return (this._fallbackRootWithEmptyString? !val : isNull(val)) && !isNull(this._root) && this._fallbackRoot
   }
 
   _isSilentFallbackWarn (key) {
@@ -1512,7 +1562,7 @@ class VueI18n {
     // We are going to replace each of
     // them with its translation
     const matches = ret.match(linkKeyMatcher);
-    
+
     // eslint-disable-next-line no-autofix/prefer-const
     for (let idx in matches) {
       // ie compatible: filter custom array
@@ -1737,7 +1787,7 @@ class VueI18n {
     return null
   }
 
-  _t (key, _locale, messages, host, ...values) {
+  _t (key, _locale, messages, host, defaultMessage, ...values) {
     if (!key) { return '' }
 
     const parsedArgs = parseArgs(...values);
@@ -1759,7 +1809,7 @@ class VueI18n {
       if (!this._root) { throw Error('unexpected error') }
       return this._root.$t(key, ...values)
     } else {
-      ret = this._warnDefault(locale, key, ret, host, values, 'string');
+      ret = this._warnDefault(locale, key, ret, host, values, 'string',defaultMessage);
       if (this._postTranslation && ret !== null && ret !== undefined) {
         ret = this._postTranslation(ret, key);
       }
@@ -1768,9 +1818,11 @@ class VueI18n {
   }
 
   t (key, ...values) {
-    return this._t(key, this.locale, this._getMessages(), null, ...values)
+    // todo
+    return this._t(key, this.locale, this._getMessages(), null, null , ...values)
   }
-
+  
+  // interpolation.js 组件中使用
   _i (key, locale, messages, host, values) {
     const ret =
       this._translate(messages, locale, this.fallbackLocale, key, host, 'raw', values);
@@ -1813,7 +1865,10 @@ class VueI18n {
     const parsedArgs = parseArgs(...values);
     parsedArgs.params = Object.assign(predefined, parsedArgs.params);
     values = parsedArgs.locale === null ? [parsedArgs.params] : [parsedArgs.locale, parsedArgs.params];
-    return this.fetchChoice(this._t(key, _locale, messages, host, ...values), choice)
+    // todo 
+    return this.fetchChoice(this._t(key, _locale, messages, host, null, {
+      key: ""
+    }, ...values), choice)
   }
 
   fetchChoice (message, choice) {
@@ -1856,7 +1911,7 @@ class VueI18n {
     }
     this._vm.$set(this._vm.messages, locale, merge(
       typeof this._vm.messages[locale] !== 'undefined' && Object.keys(this._vm.messages[locale]).length
-        ? this._vm.messages[locale]
+        ? Object.assign({}, this._vm.messages[locale])
         : {},
       message
     ));
@@ -2164,6 +2219,6 @@ Object.defineProperty(VueI18n, 'availabilities', {
 });
 
 VueI18n.install = install;
-VueI18n.version = '8.24.4';
+VueI18n.version = '8.27.1';
 
 export default VueI18n;

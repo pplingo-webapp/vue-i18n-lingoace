@@ -373,9 +373,15 @@ export default class VueI18n {
         )
       }
     }
+    const parsedArgs = parseArgs(...values)
+    const defaultMessage = parsedArgs.defaultMessage;
+    if(defaultMessage){
+       if(defaultMessage._defaultMessage){
+        return this._render(defaultMessage._defaultMessage, interpolateMode, parsedArgs.params, key)
+       }
+    }
 
     if (this._formatFallbackMessages) {
-      const parsedArgs = parseArgs(...values)
       return this._render(key, interpolateMode, parsedArgs.params, key)
     } else {
       return key
