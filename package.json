@@ -1,7 +1,7 @@
 {
   "name": "@lingoace/vue-i18n",
   "description": "Internationalization plugin for Vue.js",
-  "version": "0.0.0",
+  "version": "8.28.0",
   "author": {
     "name": "kazuya kawaguchi",
     "email": "kawakazu80@gmail.com"
@@ -137,6 +137,8 @@
     "docs:build": "cross-env NODE_ENV=production node config/version.js && cross-env NODE_ENV=production vuepress build vuepress -d docs",
     "docs:clean": "rm -rf docs/**",
     "docs:dev": "vuepress dev vuepress",
+    "release": "standard-version",
+    "postrelease": "node ./script/pushTag.js",
     "flow": "flow check",
     "lint": "eslint --fix src test types/**/*.ts",
     "sauce": "npm run sauce:coolkids && npm run sauce:ie && npm run sauce:mobile",
