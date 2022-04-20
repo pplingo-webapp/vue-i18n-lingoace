@@ -79,23 +79,49 @@ function isFunction (val) {
 function parseArgs (...args) {
   let locale = null;
   let params = null;
+  let defaultMessage = {};
+
+  //  parseArgs('local')
+  //  parseArgs(param)
+  //  parseArgs(_defaultMessage)
+  console.log(args);
   if (args.length === 1) {
-    if (isObject(args[0]) || isArray(args[0])) {
+    if (isObject(args[0]) && args[0]._defaultMessage) {
+        defaultMessage = args[0];
+    } else if (isObject(args[0]) || isArray(args[0])) {
       params = args[0];
     } else if (typeof args[0] === 'string') {
       locale = args[0];
     }
   } else if (args.length === 2) {
+    //  parseArgs('local',param)
+    //  parseArgs('local',_defaultMessage)
+    //  parseArgs(_defaultMessage,param)
+    if (typeof args[0] === 'string') {
+      locale = args[0];
+    } else if (isObject(args[0]) && args[0]._defaultMessage){
+        defaultMessage = args[0];
+    }
+    if (isObject(args[1]) && args[1]._defaultMessage){
+        defaultMessage = args[1];
+    } else if (isObject(args[1]) || isArray(args[1])) {
+        params = args[1];
+    }  
+  } else if (args.length === 3) {
+    //  parseArgs('local',_defaultMessage,param)
     if (typeof args[0] === 'string') {
       locale = args[0];
     }
-    /* istanbul ignore if */
-    if (isObject(args[1]) || isArray(args[1])) {
-      params = args[1];
-    }
+    if (isObject(args[1]) && args[1]._defaultMessage){
+      defaultMessage = args[1];
+    } 
+    if (isObject(args[2]) || isArray(args[2])) {
+        params = args[2];
+    }  
+
   }
 
-  return { locale, params }
+  return { locale, params, defaultMessage }
 }
 
 function looseClone (obj) {
@@ -218,9 +244,9 @@ function extend (Vue) {
     });
   }
 
-  Vue.prototype.$t = function (key, defaultMessage, ...values) {
+  Vue.prototype.$t = function (key,...values) {
     const i18n = this.$i18n;
-    return i18n._t(key, i18n.locale, i18n._getMessages(), this, defaultMessage, ...values)
+    return i18n._t(key, i18n.locale, i18n._getMessages(), this, ...values)
   };
 
   Vue.prototype.$tc = function (key, choice, ...values) {
@@ -1452,7 +1478,7 @@ class VueI18n {
   _getDateTimeFormats () { return this._vm.dateTimeFormats }
   _getNumberFormats () { return this._vm.numberFormats }
 
-  _warnDefault (locale, key, result, vm, values, interpolateMode, defaultMessage) {
+  _warnDefault (locale, key, result, vm, values, interpolateMode) {
     if (!isNull(result)) { return result }
     if (this._missing) {
       const missingRet = this._missing.apply(null, [locale, key, vm, values]);
@@ -1467,12 +1493,15 @@ class VueI18n {
         );
       }
     }
-    if (defaultMessage) {
-      const parsedArgs = parseArgs(...values);
-      return this._render(key, interpolateMode, parsedArgs.params, key)
+    const parsedArgs = parseArgs(...values);
+    const defaultMessage = parsedArgs.defaultMessage;
+    if(defaultMessage){
+       if(defaultMessage._defaultMessage){
+        return this._render(defaultMessage._defaultMessage, interpolateMode, parsedArgs.params, key)
+       }
     }
+
     if (this._formatFallbackMessages) {
-      const parsedArgs = parseArgs(...values);
       return this._render(key, interpolateMode, parsedArgs.params, key)
     } else {
       return key
@@ -1787,7 +1816,7 @@ class VueI18n {
     return null
   }
 
-  _t (key, _locale, messages, host, defaultMessage, ...values) {
+  _t (key, _locale, messages, host, ...values) {
     if (!key) { return '' }
 
     const parsedArgs = parseArgs(...values);
@@ -1809,7 +1838,7 @@ class VueI18n {
       if (!this._root) { throw Error('unexpected error') }
       return this._root.$t(key, ...values)
     } else {
-      ret = this._warnDefault(locale, key, ret, host, values, 'string',defaultMessage);
+      ret = this._warnDefault(locale, key, ret, host, values, 'string');
       if (this._postTranslation && ret !== null && ret !== undefined) {
         ret = this._postTranslation(ret, key);
       }
@@ -1818,11 +1847,9 @@ class VueI18n {
   }
 
   t (key, ...values) {
-    // todo
-    return this._t(key, this.locale, this._getMessages(), null, null , ...values)
+    return this._t(key, this.locale, this._getMessages(), null, ...values)
   }
-  
-  // interpolation.js 组件中使用
+
   _i (key, locale, messages, host, values) {
     const ret =
       this._translate(messages, locale, this.fallbackLocale, key, host, 'raw', values);
@@ -1865,10 +1892,7 @@ class VueI18n {
     const parsedArgs = parseArgs(...values);
     parsedArgs.params = Object.assign(predefined, parsedArgs.params);
     values = parsedArgs.locale === null ? [parsedArgs.params] : [parsedArgs.locale, parsedArgs.params];
-    // todo 
-    return this.fetchChoice(this._t(key, _locale, messages, host, null, {
-      key: ""
-    }, ...values), choice)
+    return this.fetchChoice(this._t(key, _locale, messages, host, ...values), choice)
   }
 
   fetchChoice (message, choice) {
@@ -2219,6 +2243,6 @@ Object.defineProperty(VueI18n, 'availabilities', {
 });
 
 VueI18n.install = install;
-VueI18n.version = '8.27.1';
+VueI18n.version = '0.0.0';
 
 export default VueI18n;

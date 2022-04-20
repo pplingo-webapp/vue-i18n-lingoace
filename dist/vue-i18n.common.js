@@ -1,5 +1,5 @@
 /*!
- * @lingoace/vue-i18n v8.27.1 
+ * @lingoace/vue-i18n v0.0.0 
  * (c) 2022 kazuya kawaguchi
  * Released under the MIT License.
  */
@@ -89,23 +89,49 @@ function parseArgs () {
 
   var locale = null;
   var params = null;
+  var defaultMessage = {};
+
+  //  parseArgs('local')
+  //  parseArgs(param)
+  //  parseArgs(_defaultMessage)
+  console.log(args);
   if (args.length === 1) {
-    if (isObject(args[0]) || isArray(args[0])) {
+    if (isObject(args[0]) && args[0]._defaultMessage) {
+        defaultMessage = args[0];
+    } else if (isObject(args[0]) || isArray(args[0])) {
       params = args[0];
     } else if (typeof args[0] === 'string') {
       locale = args[0];
     }
   } else if (args.length === 2) {
+    //  parseArgs('local',param)
+    //  parseArgs('local',_defaultMessage)
+    //  parseArgs(_defaultMessage,param)
+    if (typeof args[0] === 'string') {
+      locale = args[0];
+    } else if (isObject(args[0]) && args[0]._defaultMessage){
+        defaultMessage = args[0];
+    }
+    if (isObject(args[1]) && args[1]._defaultMessage){
+        defaultMessage = args[1];
+    } else if (isObject(args[1]) || isArray(args[1])) {
+        params = args[1];
+    }  
+  } else if (args.length === 3) {
+    //  parseArgs('local',_defaultMessage,param)
     if (typeof args[0] === 'string') {
       locale = args[0];
     }
-    /* istanbul ignore if */
-    if (isObject(args[1]) || isArray(args[1])) {
-      params = args[1];
-    }
+    if (isObject(args[1]) && args[1]._defaultMessage){
+      defaultMessage = args[1];
+    } 
+    if (isObject(args[2]) || isArray(args[2])) {
+        params = args[2];
+    }  
+
   }
 
-  return { locale: locale, params: params }
+  return { locale: locale, params: params, defaultMessage: defaultMessage }
 }
 
 function looseClone (obj) {
@@ -230,12 +256,12 @@ function extend (Vue) {
     });
   }
 
-  Vue.prototype.$t = function (key, defaultMessage) {
-    var values = [], len = arguments.length - 2;
-    while ( len-- > 0 ) values[ len ] = arguments[ len + 2 ];
+  Vue.prototype.$t = function (key) {
+    var values = [], len = arguments.length - 1;
+    while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
 
     var i18n = this.$i18n;
-    return i18n._t.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this, defaultMessage ].concat( values ))
+    return i18n._t.apply(i18n, [ key, i18n.locale, i18n._getMessages(), this ].concat( values ))
   };
 
   Vue.prototype.$tc = function (key, choice) {
@@ -1473,7 +1499,7 @@ VueI18n.prototype._getMessages = function _getMessages () { return this._vm.mess
 VueI18n.prototype._getDateTimeFormats = function _getDateTimeFormats () { return this._vm.dateTimeFormats };
 VueI18n.prototype._getNumberFormats = function _getNumberFormats () { return this._vm.numberFormats };
 
-VueI18n.prototype._warnDefault = function _warnDefault (locale, key, result, vm, values, interpolateMode, defaultMessage) {
+VueI18n.prototype._warnDefault = function _warnDefault (locale, key, result, vm, values, interpolateMode) {
   if (!isNull(result)) { return result }
   if (this._missing) {
     var missingRet = this._missing.apply(null, [locale, key, vm, values]);
@@ -1488,13 +1514,16 @@ VueI18n.prototype._warnDefault = function _warnDefault (locale, key, result, vm,
       );
     }
   }
-  if (defaultMessage) {
-    var parsedArgs = parseArgs.apply(void 0, values);
-    return this._render(key, interpolateMode, parsedArgs.params, key)
+  var parsedArgs = parseArgs.apply(void 0, values);
+  var defaultMessage = parsedArgs.defaultMessage;
+  if(defaultMessage){
+     if(defaultMessage._defaultMessage){
+      return this._render(defaultMessage._defaultMessage, interpolateMode, parsedArgs.params, key)
+     }
   }
+
   if (this._formatFallbackMessages) {
-    var parsedArgs$1 = parseArgs.apply(void 0, values);
-    return this._render(key, interpolateMode, parsedArgs$1.params, key)
+    return this._render(key, interpolateMode, parsedArgs.params, key)
   } else {
     return key
   }
@@ -1811,11 +1840,11 @@ VueI18n.prototype._translate = function _translate (
   return null
 };
 
-VueI18n.prototype._t = function _t (key, _locale, messages, host, defaultMessage) {
+VueI18n.prototype._t = function _t (key, _locale, messages, host) {
     var ref;
 
-    var values = [], len = arguments.length - 5;
-    while ( len-- > 0 ) values[ len ] = arguments[ len + 5 ];
+    var values = [], len = arguments.length - 4;
+    while ( len-- > 0 ) values[ len ] = arguments[ len + 4 ];
   if (!key) { return '' }
 
   var parsedArgs = parseArgs.apply(void 0, values);
@@ -1837,7 +1866,7 @@ VueI18n.prototype._t = function _t (key, _locale, messages, host, defaultMessage
     if (!this._root) { throw Error('unexpected error') }
     return (ref = this._root).$t.apply(ref, [ key ].concat( values ))
   } else {
-    ret = this._warnDefault(locale, key, ret, host, values, 'string',defaultMessage);
+    ret = this._warnDefault(locale, key, ret, host, values, 'string');
     if (this._postTranslation && ret !== null && ret !== undefined) {
       ret = this._postTranslation(ret, key);
     }
@@ -1850,11 +1879,9 @@ VueI18n.prototype.t = function t (key) {
 
     var values = [], len = arguments.length - 1;
     while ( len-- > 0 ) values[ len ] = arguments[ len + 1 ];
-  // todo
-  return (ref = this)._t.apply(ref, [ key, this.locale, this._getMessages(), null, null ].concat( values ))
+  return (ref = this)._t.apply(ref, [ key, this.locale, this._getMessages(), null ].concat( values ))
 };
-  
-// interpolation.js 组件中使用
+
 VueI18n.prototype._i = function _i (key, locale, messages, host, values) {
   var ret =
     this._translate(messages, locale, this.fallbackLocale, key, host, 'raw', values);
@@ -1900,10 +1927,7 @@ VueI18n.prototype._tc = function _tc (
   var parsedArgs = parseArgs.apply(void 0, values);
   parsedArgs.params = Object.assign(predefined, parsedArgs.params);
   values = parsedArgs.locale === null ? [parsedArgs.params] : [parsedArgs.locale, parsedArgs.params];
-  // todo 
-  return this.fetchChoice((ref = this)._t.apply(ref, [ key, _locale, messages, host, null, {
-    key: ""
-  } ].concat( values )), choice)
+  return this.fetchChoice((ref = this)._t.apply(ref, [ key, _locale, messages, host ].concat( values )), choice)
 };
 
 VueI18n.prototype.fetchChoice = function fetchChoice (message, choice) {
@@ -2270,6 +2294,6 @@ Object.defineProperty(VueI18n, 'availabilities', {
 });
 
 VueI18n.install = install;
-VueI18n.version = '8.27.1';
+VueI18n.version = '0.0.0';
 
 module.exports = VueI18n;

@@ -1,137 +1,62 @@
-<p align="center"><img width="128px" height="112px" src="./assets/vue-i18n-logo.png" alt="Vue I18n logo"></p>
-<h1 align="center">vue-i18n</h1>
-<p align="center">
-  <a href="https://circleci.com/gh/kazupon/vue-i18n/tree/dev"><img src="https://circleci.com/gh/kazupon/vue-i18n/tree/dev.svg?style=shield" alt="Build Status"></a>
-  <a href="http://badge.fury.io/js/vue-i18n"><img src="https://badge.fury.io/js/vue-i18n.svg" alt="NPM version"></a>
-  <a href="https://discord.gg/4yCnk2m"><img src="https://img.shields.io/badge/Discord-join%20chat-738bd7.svg" alt="vue-i18n channel on Discord"></a>
-</p>
+# 项目名
+@lingoace/vue-i18n
+## 简介（Introduction）
+Vue I18n 是 Vue.js 的国际化插件
 
-<p align="center">Internationalization plugin for Vue.js</p>
+## 方案选择（Scheme）
+[方案设计文档](https://pplingo.atlassian.net/wiki/spaces/DEV/pages/352619365/lingoace+vue-i18n)
 
-<br/>
+## 使用指南
+### 安装
+推荐使用 npm 的方式安装，它能更好地和 webpack 打包工具配合使用。
+> npm install @lingoace/vue-i18n
 
-<h3 align="center">🏅 Platinum Sponsors</h3>
+### 快速使用
+```
+<p>{{ $t("hello",{
+      defaultMessage:"你好"
+  })}}</p>
+const messages = {
+  en: {
+      hello: 'hello'
+  }
+}
+<p>{{ $t("hello.name",{
+      defaultMessage: "你好 {name}"
+  },{name:"武晓"}) }}</p>
+const messages = {
+  en: {
+    hello: {
+      name: 'hello {name}'
+    }
+  }
+}
+```
+## 问题
+1. SDK 资源未上传 CDN, 在业务项目，无法快速回滚版本；
+## 发布指南
 
-<p align="center">
-  <a href="https://zenarchitects.co.jp/" target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/zenarchitects.png"
-      width="400px"
-    />
-  </a>
-</p>
+### 发布命令
 
-<h3 align="center">✨ Special Sponsors</h3>
+```bash
+npm run release
 
-<p align="center">
-  <a
-    href="https://plaid.co.jp/"
-    target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/plaid.svg"
-      width="240px"
-    />
-  </a>
-</p>
+# 以下示例均基于 1.0.0 版本操作
 
-<h3 align="center">🥇 Gold Sponsors</h3>
+# 发布预发布版本：1.0.1-0
+npm run release -- --prerelease
 
-<p align="center">
-  <a
-    href="https://nuxtjs.org/"
-    target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/nuxt.png"
-      width="240px"
-    />
-  </a>
-</p>
+# 发布alpha版本：1.0.1-alpha.0
+npm run release -- --prerelease alpha
 
-<p align="center">
-  <a
-    href="https://rapidapi.com/"
-    target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/RapidAPI.svg"
-      width="240px"
-    />
-  </a>
-</p>
+# 指定版本：
+npm run release --  --release-as 1.1.0
 
-<p align="center">
-  <a
-    href="https://localazy.com/blog/how-to-localize-vuejs-app-with-vue-i18n-and-localazy?utm_source=kazupon&utm_medium=banner&utm_campaign=sponsorships_kazupon&utm_content=logo"
-    target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/localazy.svg"
-      width="240px"
-    />
-  </a>
-</p>
-
-
-<h3 align="center">🥈 Silver Sponsors</h3>
-
-<h3 align="center">🥉 Bronze Sponsors</h3>
-
-<p align="center">
-  <a href="https://www.sendcloud.com/" target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/sendcloud.png"
-      width="144px"
-    />
-  </a>
-</p>
-<p align="center">
-  <a href="https://www.vuemastery.com/" target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/vuemastery.png"
-      width="144px"
-    />
-  </a>
-</p>
-<p align="center">
-  <a href="https://www.deci-bel.com/" target="_blank">
-    <img
-      src="https://raw.githubusercontent.com/kazupon/vue-i18n/v8.x/vuepress/.vuepress/public/patrons/decibel.png"
-      width="144px"
-    />
-  </a>
-</p>
-
-<br/>
-
-## ⚠️  NOTICE
-
-**This repository is for Vue I18n v8.x and Vue 2**
-
-**If you want to know about how to usage for Vue I18n v9 on Vue 3, See the [this repository](https://github.com/intlify/vue-i18n-next))**
-
-## 🙋‍♂️ About support for v8
-
-We will follow Vue v2 maintenance lifespan
-
-## 📔 Documentation
-
-About Vue I18n v8.x, See [here](http://kazupon.github.io/vue-i18n/)
-
-If you want to read Vue I18n v9 docs, See [here](https://vue-i18n.intlify.dev/)
-
-## 📜 Changelog
-
-Detailed changes for each release are documented in the [CHANGELOG.md](https://github.com/kazupon/vue-i18n/blob/dev/CHANGELOG.md).
-
-
-## ❗ Issues
-
-Please make sure to read the [Issue Reporting Checklist](https://github.com/kazupon/vue-i18n/blob/dev/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
-
-
-## 💪 Contribution
-
-Please make sure to read the [Contributing Guide](https://github.com/kazupon/vue-i18n/blob/dev/CONTRIBUTING.md) before making a pull request.
-
-
-## ©️ License
-
-[MIT](http://opensource.org/licenses/MIT)
+# 自动升级版本：major, minor 或 patch
+# 主版本：2.0.0
+npm run release --  --release-as major
+# 次版本：1.1.0
+npm run release -- --release-as minor
+# 补丁版本：1.0.1
+npm run release -- --release-as patch
+```

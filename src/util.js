@@ -80,39 +80,45 @@ export function parseArgs (...args: Array<mixed>): Object {
   let locale: ?string = null
   let params: mixed = null
   let defaultMessage: DefaultMessage = {}
+
+  //  parseArgs('local')
+  //  parseArgs(param)
+  //  parseArgs(_defaultMessage)
+  console.log(args);
   if (args.length === 1) {
-    if (isObject(args[0])) {
-      if(args[0] !== null && args[0]._defaultMessage){
+    if (isObject(args[0]) && args[0]._defaultMessage) {
         defaultMessage = args[0];
-      }
     } else if (isObject(args[0]) || isArray(args[0])) {
       params = args[0]
     } else if (typeof args[0] === 'string') {
       locale = args[0]
     }
   } else if (args.length === 2) {
+    //  parseArgs('local',param)
+    //  parseArgs('local',_defaultMessage)
+    //  parseArgs(_defaultMessage,param)
     if (typeof args[0] === 'string') {
       locale = args[0]
+    } else if (isObject(args[0]) && args[0]._defaultMessage){
+        defaultMessage = args[0];
     }
-    if (isObject(args[1])) {
-      if(args[1] !== null && args[1]._defaultMessage){
+    if (isObject(args[1]) && args[1]._defaultMessage){
         defaultMessage = args[1];
-      }
     } else if (isObject(args[1]) || isArray(args[1])) {
         params = args[1]
     }  
   } else if (args.length === 3) {
+    //  parseArgs('local',_defaultMessage,param)
     if (typeof args[0] === 'string') {
       locale = args[0]
     }
-    if (isObject(args[1]) || isArray(args[1])) {
-        params = args[1]
-    }  
-    if (isObject(args[2])) {
-      if(args[2] !== null && args[2]._defaultMessage){
-        defaultMessage = args[2];
-      }
+    if (isObject(args[1]) && args[1]._defaultMessage){
+      defaultMessage = args[1];
     } 
+    if (isObject(args[2]) || isArray(args[2])) {
+        params = args[2]
+    }  
+
   }
 
   return { locale, params, defaultMessage }

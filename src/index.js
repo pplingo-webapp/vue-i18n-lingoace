@@ -79,10 +79,10 @@ export default class VueI18n {
       install(window.Vue)
     }
 
-    const locale: Locale = options.locale || 'en-US'
+    const locale: Locale = options.locale || 'zh-CN'
     const fallbackLocale: FallbackLocale = options.fallbackLocale === false
       ? false
-      : options.fallbackLocale || 'en-US'
+      : options.fallbackLocale || 'zh-CN'
     const messages: LocaleMessages = options.messages || {}
     const dateTimeFormats = options.dateTimeFormats || options.datetimeFormats || {}
     const numberFormats = options.numberFormats || {}

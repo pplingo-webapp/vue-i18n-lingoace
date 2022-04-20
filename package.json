@@ -1,7 +1,7 @@
 {
   "name": "@lingoace/vue-i18n",
   "description": "Internationalization plugin for Vue.js",
-  "version": "8.27.1",
+  "version": "0.0.0",
   "author": {
     "name": "kazuya kawaguchi",
     "email": "kawakazu80@gmail.com"
@@ -41,6 +41,7 @@
     "cross-env": "^7.0.2",
     "cross-spawn": "^7.0.3",
     "eslint": "^6.8.0",
+    "standard-version": "^7.1.0",
     "eslint-loader": "^4.0.2",
     "eslint-plugin-flowtype": "^4.7.0",
     "eslint-plugin-ie11": "^1.0.0",
@@ -66,6 +67,8 @@
     "mocha-loader": "^5.0.0",
     "nightwatch": "^1.3.5",
     "nightwatch-helpers": "^1.2.0",
+    "commitizen": "^4.0.4",
+    "cz-conventional-changelog": "^3.1.0",
     "power-assert": "^1.6.0",
     "rollup": "^0.66.0",
     "rollup-plugin-buble": "^0.19.2",
@@ -74,7 +77,6 @@
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-replace": "^2.0.0",
     "selenium-server": "^3.141.59",
-    "shipjs": "^0.23.3",
     "sinon": "^11.1.1",
     "terser": "^3.17.0",
     "typescript": "^3.9.3",
@@ -119,6 +121,14 @@
     "type": "git",
     "url": "git+https://github.com/pplingo-webapp/vue-i18n-lingoace.git"
   },
+  "publishConfig": {
+    "registry": "http://verdaccio.lingoace.com"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
   "scripts": {
     "build": "node config/build.js",
     "clean": "rm -rf coverage && rm -rf dist/*.js* && rm ./*.log",
@@ -129,8 +139,6 @@
     "docs:dev": "vuepress dev vuepress",
     "flow": "flow check",
     "lint": "eslint --fix src test types/**/*.ts",
-    "release:prepare": "shipjs prepare",
-    "release:trigger": "shipjs trigger",
     "sauce": "npm run sauce:coolkids && npm run sauce:ie && npm run sauce:mobile",
     "sauce:coolkids": "karma start config/karma.sauce.conf.js -- 0",
     "sauce:ie": "karma start config/karma.sauce.conf.js -- 1",

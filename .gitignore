@@ -12,4 +12,5 @@ vuepress/.vuepress/dist
 .env
 *.log
 *.swp
+dist
 *~

@@ -8,7 +8,7 @@
   </head>
   <body>
     <div id="app">
-      <p v-html="$t('message.hello')"></p>
+      <p v-html="$t('message.hello',{_defaultMessage:'呵呵呵'})"></p>
     </div>
     <script>
       Vue.use(VueI18n)
