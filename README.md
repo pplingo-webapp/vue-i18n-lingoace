@@ -12,26 +12,41 @@ Vue I18n 是 Vue.js 的国际化插件
 > npm install @lingoace/vue-i18n
 
 ### 快速使用
+
+```javascript
+|-- src
+  |-- locales
+     |-- messages
+          |-- en-US.json
+          |-- zh-CN.json
+      |-- index.js
 ```
-<p>{{ $t("hello",{
-      defaultMessage:"你好"
-  })}}</p>
-const messages = {
-  en: {
-      hello: 'hello'
-  }
-}
-<p>{{ $t("hello.name",{
-      defaultMessage: "你好 {name}"
-  },{name:"武晓"}) }}</p>
-const messages = {
-  en: {
-    hello: {
-      name: 'hello {name}'
-    }
-  }
-}
+locales 多语言资源（messages），必须单独存在一个目录。用于 eslint 检查。
+> 注意，messages 目录不要包含业务代码，必须 *.json 结尾。
+
+```javascript
+import VueI18n from '@lingoace/vue-i18n'
+import messages from "./locales";
+Vue.use(VueI18n);
+const i18n = new VueI18n({
+  locale: 'zh-CN',
+  messages, 
+})
 ```
+组件应用如下：
+```javascript
+<template>
+  <div id="app">
+    {{ $t('test',{_defaultMessage:'测试'}) }}
+  </div>
+</template>
+<script>
+export default {  
+  
+}
+</script>
+```
+_defaultMessage 为缺失 key 的回退文字。也可以当作注释使用。
 ## 问题
 1. SDK 资源未上传 CDN, 在业务项目，无法快速回滚版本；
 ## 发布指南
