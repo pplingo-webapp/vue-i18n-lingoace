@@ -1206,10 +1206,10 @@ class VueI18n {
       install(window.Vue);
     }
 
-    const locale = options.locale || 'en-US';
+    const locale = options.locale || 'zh-CN';
     const fallbackLocale = options.fallbackLocale === false
       ? false
-      : options.fallbackLocale || 'en-US';
+      : options.fallbackLocale || 'zh-CN';
     const messages = options.messages || {};
     const dateTimeFormats = options.dateTimeFormats || options.datetimeFormats || {};
     const numberFormats = options.numberFormats || {};
@@ -2243,6 +2243,6 @@ Object.defineProperty(VueI18n, 'availabilities', {
 });
 
 VueI18n.install = install;
-VueI18n.version = '0.0.0';
+VueI18n.version = '8.28.0';
 
 export default VueI18n;

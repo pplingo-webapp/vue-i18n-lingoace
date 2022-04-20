@@ -1,5 +1,5 @@
 /*!
- * @lingoace/vue-i18n v0.0.0 
+ * @lingoace/vue-i18n v8.28.0 
  * (c) 2022 kazuya kawaguchi
  * Released under the MIT License.
  */
@@ -1226,10 +1226,10 @@
       install(window.Vue);
     }
 
-    var locale = options.locale || 'en-US';
+    var locale = options.locale || 'zh-CN';
     var fallbackLocale = options.fallbackLocale === false
       ? false
-      : options.fallbackLocale || 'en-US';
+      : options.fallbackLocale || 'zh-CN';
     var messages = options.messages || {};
     var dateTimeFormats = options.dateTimeFormats || options.datetimeFormats || {};
     var numberFormats = options.numberFormats || {};
@@ -2298,7 +2298,7 @@
   });
 
   VueI18n.install = install;
-  VueI18n.version = '0.0.0';
+  VueI18n.version = '8.28.0';
 
   return VueI18n;
 
