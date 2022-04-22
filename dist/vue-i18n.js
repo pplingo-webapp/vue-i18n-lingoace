@@ -1,5 +1,5 @@
 /*!
- * @lingoace/vue-i18n v8.28.0 
+ * @lingoace/vue-i18n v8.29.0 
  * (c) 2022 kazuya kawaguchi
  * Released under the MIT License.
  */
@@ -2298,7 +2298,7 @@
   });
 
   VueI18n.install = install;
-  VueI18n.version = '8.28.0';
+  VueI18n.version = '8.29.0';
 
   return VueI18n;
 

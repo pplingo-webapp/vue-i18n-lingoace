@@ -84,7 +84,6 @@ export function parseArgs (...args: Array<mixed>): Object {
   //  parseArgs('local')
   //  parseArgs(param)
   //  parseArgs(_defaultMessage)
-  console.log(args);
   if (args.length === 1) {
     if (isObject(args[0]) && args[0]._defaultMessage) {
         defaultMessage = args[0];
