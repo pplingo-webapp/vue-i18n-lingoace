@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [8.29.1](https://github.com/pplingo-webapp/vue-i18n-lingoace/compare/v8.29.0...v8.29.1) (2022-04-22)
+
 ## [8.29.0](https://github.com/pplingo-webapp/vue-i18n-lingoace/compare/v8.28.0...v8.29.0) (2022-04-20)
 
 
