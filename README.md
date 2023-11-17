@@ -4,7 +4,7 @@
 Vue I18n 是 Vue.js 的国际化插件
 
 ## 方案选择（Scheme）
-[方案设计文档](https://pplingo.atlassian.net/wiki/spaces/DEV/pages/352619365/lingoace+vue-i18n)
+
 
 ## 使用指南
 ### 安装
